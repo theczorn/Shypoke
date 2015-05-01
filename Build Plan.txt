@@ -1,0 +1,29 @@
+BIG LIST OF THINGS TODO:
+
+ITERATION 1:
+--Handle Betting Scheme
+--Handle Card Comparisons
+--Handle Game End/Restart
+--Handle 2 Person game ruleset
+--Handle Empty Deck merge
+--ENSURE CYCLOMATIC COMPLEXITY lower than 10
+
+ITERATION 2:
+--Multithread Card Comparison
+--Refactor/Reorg
+--Customize LinkedList for players (ROLL YOUR OWN DAWG)
+
+ITERATION 3:
+--Refactor into basic GUI
+--allow for wireless play (TCP)
+
+
+Linked List
++Faster Iteration
++Easier to Modify mid-game
+-Deeper structure to read thru == cluttery code
+
+ArrayList
++Mid-Speed Iteration
++Shallow struct to read
+-Hard to modify mid-game
