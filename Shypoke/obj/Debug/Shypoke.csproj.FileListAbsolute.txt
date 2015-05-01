@@ -1,0 +1,2 @@
+C:\Users\Curtis\Desktop\Tools\Projects\Shypoke\Shypoke\bin\Debug\Shypoke.exe.config
+C:\Users\Curtis\Desktop\Tools\Projects\Shypoke\Shypoke\obj\Debug\Shypoke.csprojResolveAssemblyReference.cache
