@@ -25,7 +25,7 @@ namespace Shypoke
     class Card
     {
         public int cardPointValue { get; set; }
-        private string cardSuiteName;
+        public string cardSuiteName { get; set; }
         private string cardValueName;
 
         private string[] SuiteNameList = Enum.GetNames(typeof(Hearts));

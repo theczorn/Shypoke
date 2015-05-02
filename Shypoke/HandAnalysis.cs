@@ -12,9 +12,7 @@ namespace Shypoke
         public static int AnalyzeHand(List<Card> testHand){
             int handScore = 0;  //Default highcard
 
-
-            //CZTODO: FUCK ACES CAN BE LOW OR HIGH
-            testHand = SortHand(testHand);  //hands are analyzed with an assumed order of low-to-high
+            testHand.Sort();    //hands are analyzed with an assumed order of low-to-high   //CZTOOD: ENSURE SORT ORDER IS CORRECT
 
             if (IsStraightFlush(testHand))
                 handScore = 256;
@@ -38,23 +36,15 @@ namespace Shypoke
             return handScore;
         }
 
-        private static bool IsStraight(List<Card> testHand)
+        private static bool IsStraightFlush(List<Card> testHand)
         {
-            //CZTODO: Optimize algorithm
-            testHand = testHand.Distinct().ToList();    //dupes skew analysis, remove
-
-            if (testHand.Count >= 5)
+            //CZTODO: Impacted by Ace Low, is this logic sound???
+            if(IsFlush(testHand) && IsStraight(testHand))
             {
-                testHand.FindAll(); //CZTODO: Craft predicate to find the finite ranges (remember ace low)
+                return true;
             }
 
             return false;
-        }
-
-        private static bool IsTwoPair(List<Card> testHand)
-        {
-            return testHand.GroupBy(x => x.cardPointValue)
-                    .Where(x => x.Count() == 2).Count() >= 2;
         }
 
         private static bool IsFour(List<Card> testHand)
@@ -63,10 +53,63 @@ namespace Shypoke
                     .Where(x => x.Count() == 4).Count() > 0;
         }
 
+        private static bool IsFullHouse(List<Card> testHand)
+        {
+           //CZTODO - Fix Scoring due to 3x2 needed?
+            return (testHand.GroupBy(x => x.cardPointValue)     //find set of 3
+                     .Where(x => x.Count() >= 3).Count() > 0
+                     &&
+                     testHand.GroupBy(x => x.cardPointValue)    //find set of 2
+                     .Where(x => x.Count() >= 2).Count() > 0
+                     );
+        }
+
+        private static bool IsFlush(List<Card> testHand)
+        {
+            return testHand.GroupBy(x => x.cardSuiteName)
+                    .Where(x => x.Count() == 5).Count() > 0;
+        }
+
+        private static bool IsStraight(List<Card> testHand)
+        {
+            //CZTODO: Optimize algorithm, impacted by Ace Low
+            testHand = testHand.Distinct().ToList();    //dupes skew analysis, remove
+
+            if (testHand.Count >= 5)
+            {
+                if (testHand[4].cardPointValue - testHand[0].cardPointValue == 4)
+                    return true;
+            }
+            else   //kill processing immediately, nothing here
+            {
+                return false;
+            }
+            
+            if(testHand.Count >= 6)
+            {
+                if (testHand[5].cardPointValue - testHand[1].cardPointValue == 4)
+                    return true;
+            }
+
+            if (testHand.Count == 7)
+            {
+                if (testHand[6].cardPointValue - testHand[2].cardPointValue == 4)
+                    return true;
+            }
+
+            return false;
+        }
+
         private static bool IsThree(List<Card> testHand)
         {
             return testHand.GroupBy(x => x.cardPointValue)
                     .Where(x => x.Count() == 3).Count() > 0;
+        }
+
+        private static bool IsTwoPair(List<Card> testHand)
+        {
+            return testHand.GroupBy(x => x.cardPointValue)
+                    .Where(x => x.Count() == 2).Count() >= 2;
         }
 
         private static bool IsPair(List<Card> testHand)
