@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shypoke", "Shypoke\Shypoke.csproj", "{3FB95236-1E63-43C1-9A04-A13EABD5B76C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shypoke_TDD", "Shypoke_TDD\Shypoke_TDD.csproj", "{5F5722F8-96BB-4B44-8D27-127A4CC5B867}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{3FB95236-1E63-43C1-9A04-A13EABD5B76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FB95236-1E63-43C1-9A04-A13EABD5B76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FB95236-1E63-43C1-9A04-A13EABD5B76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F5722F8-96BB-4B44-8D27-127A4CC5B867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F5722F8-96BB-4B44-8D27-127A4CC5B867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F5722F8-96BB-4B44-8D27-127A4CC5B867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F5722F8-96BB-4B44-8D27-127A4CC5B867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -28,7 +28,7 @@ namespace Shypoke
         public string cardSuiteName { get; set; }
         private string cardValueName;
 
-        private string[] SuiteNameList = Enum.GetNames(typeof(Hearts));
+        private string[] SuiteNameList = Enum.GetNames(typeof(Hearts));     //names of all cards universal, use hearts as constructor
         public Card(String Suite, int value)
         {
             this.cardSuiteName = Suite;
