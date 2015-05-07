@@ -1,7 +1,11 @@
 BIG LIST OF THINGS TODO:
 
+LEGEND:
+-V = Validate Code
+-X = Completed
+
 ITERATION 1:
---Handle Betting Scheme
+--Handle Betting Scheme [V]
 --Handle Card Comparisons
 --Handle Game End/Restart
 --Handle 2 Person game ruleset
@@ -11,14 +15,14 @@ ITERATION 1:
 ITERATION 2:
 --Multithread Card Comparison
 --Refactor/Reorg
---Customize LinkedList for players (ROLL YOUR OWN DAWG)
+--Customize LinkedList for players (ROLL YOUR OWN DAWG) [X]
 
 ITERATION 3:
 --Refactor into basic GUI
 --allow for wireless play (TCP)
 
 
-Linked List
+Linked List <------ In Use
 +Faster Iteration
 +Easier to Modify mid-game
 -Deeper structure to read thru == cluttery code

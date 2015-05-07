@@ -10,7 +10,7 @@ namespace Shypoke
     {
         private static int handScore = 0;  //Default highcard
 
-        //returns numeric value sum of maximal hand + type score
+        //returns numeric value sum of maximal hand + type score //CZTODO: HAND MATH WRONG!?
         public static int AnalyzeHand(List<Card> testHand){
             testHand.Sort();    //hands are analyzed with an assumed order of low-to-high   //CZTOOD: ENSURE SORT ORDER IS CORRECT
 
@@ -51,72 +51,129 @@ namespace Shypoke
             return false;
         }
 
-        private static bool IsFour(List<Card> testHand)  //CZTODO: Calc score
+        private static bool IsFour(List<Card> testHand)
         {
-            handScore = 0;
-            return testHand.GroupBy(x => x.cardPointValue)
-                    .Where(x => x.Count() == 4).Count() > 0;
+
+            List<Card> pairList = testHand.GroupBy(x => x.cardPointValue)
+                .Last(x => x.Count() == 4)
+                .Select(x => x).ToList();
+
+            if (pairList.Count() < 1)
+                return false;
+
+            testHand = testHand.Except(pairList).ToList();   //drop our pair to safely cleanse set
+            testHand.RemoveRange(0, 2);  //drop until all we have is the high card
+            testHand.AddRange(pairList);
+
+            handScore = testHand.Sum(x => x.cardPointValue);
+
+            return true;
         }
 
         private static bool IsFullHouse(List<Card> testHand) //CZTODO: Calc Score
         {
-            handScore = 0;
            //CZTODO - Fix Scoring due to 3x2 needed?
-            return (testHand.GroupBy(x => x.cardPointValue)     //find set of 3
-                     .Where(x => x.Count() >= 3).Count() > 0
-                     &&
-                     testHand.GroupBy(x => x.cardPointValue)    //find set of 2
-                     .Where(x => x.Count() >= 2).Count() > 0
-                     );
+            var testGroup = testHand.GroupBy(x => x.cardPointValue);
+
+            if (
+                testGroup.Where(x => x.Count() >= 3).Count() > 0
+                &&
+                testGroup.Where(x => x.Count() >= 2).Count() > 0
+               )
+            {
+                       
+            }
+            
+            return false;
         }
 
         private static bool IsFlush(List<Card> testHand)
         {
-            return testHand.GroupBy(x => x.cardSuiteName)
-                    .Where(x => x.Count() == 5).Count() > 0;
+            testHand = testHand.GroupBy(x => x.cardSuiteName)
+                    .First(x => x.Count() >= 5).Select(x => x).ToList();
+
+            testHand.Reverse();
+
+            if (testHand.Count() < 1)
+                return false;
+            else
+            {
+                testHand.GetRange(0, 5);
+                handScore = testHand.Sum(x => x.cardPointValue);
+                return true;
+            }
         }
 
-        private static bool IsStraight(List<Card> testHand)  //CZTODO: Calc score
+        private static bool IsStraight(List<Card> testHand)
         {
-
             //CZTODO: Optimize algorithm, impacted by Ace Low
             testHand = testHand.Distinct().ToList();    //dupes skew analysis, remove
 
-            if (testHand.Count >= 5)
+            try
             {
-                if (testHand[4].cardPointValue - testHand[0].cardPointValue == 4)
+                if (testHand[4].cardPointValue - testHand[0].cardPointValue == 4) {
+                    handScore = testHand.GetRange(0, 5).Sum(x => x.cardPointValue);
                     return true;
-            }
-            else   //kill processing immediately, nothing here
-            {
-                return false;
-            }
-            
-            if(testHand.Count >= 6)
-            {
-                if (testHand[5].cardPointValue - testHand[1].cardPointValue == 4)
-                    return true;
-            }
+                }
 
-            if (testHand.Count == 7)
-            {
+                if (testHand[5].cardPointValue - testHand[1].cardPointValue == 4)
+                {
+                    handScore = testHand.GetRange(1, 6).Sum(x => x.cardPointValue);
+                        return true;
+                }
+
                 if (testHand[6].cardPointValue - testHand[2].cardPointValue == 4)
+                {
+                    handScore = testHand.GetRange(2, 7).Sum(x => x.cardPointValue);
                     return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() != typeof(IndexOutOfRangeException))
+                    throw;
             }
 
             return false;
         }
 
-        private static bool IsThree(List<Card> testHand) //CZTODO: Calc score
+        private static bool IsThree(List<Card> testHand) 
         {
-            return testHand.GroupBy(x => x.cardPointValue)
-                    .Where(x => x.Count() == 3).Count() > 0;
+            List<Card> highTriple = testHand.GroupBy(x => x.cardPointValue)
+                    .Last(x => x.Count() == 3).Select(x => x).ToList();
+
+            if (highTriple.Count() < 1)
+                return false;
+            else if (highTriple.Count() > 1)
+                highTriple.RemoveRange(0, 3);   //remove lower triple
+
+            testHand = testHand.Except(highTriple).ToList();   //drop our pair to safely cleanse set
+            testHand.RemoveRange(0, 5);  //preserve highest two
+            testHand.AddRange(highTriple);
+
+            handScore = testHand.Sum(x => x.cardPointValue);
+
+            return true;
         }
 
-        private static bool IsTwoPair(List<Card> testHand)   //CZTODO: Calc score
+        private static bool IsTwoPair(List<Card> testHand)
         {
-            return testHand.GroupBy(x => x.cardPointValue)
-                    .Where(x => x.Count() == 2).Count() >= 2;
+            List<Card> pairList = testHand.GroupBy(x => x.cardPointValue)
+                .TakeWhile(x => x.Count() == 2)
+                .SelectMany(x => x).ToList();
+
+            if (pairList.Count() < 4)
+                return false;
+            else if (pairList.Count() > 4)
+                pairList.RemoveRange(0, 2); //3 pair in List, remove first, lowest pair
+
+            testHand = testHand.Except(pairList).ToList();   //drop our pair to safely cleanse set
+            testHand.RemoveRange(0, 3);  //drop until all we have is the high card
+            testHand.AddRange(pairList);
+
+            handScore = testHand.Sum(x => x.cardPointValue);
+
+            return true;
         }
 
         private static bool IsPair(List<Card> testHand)
