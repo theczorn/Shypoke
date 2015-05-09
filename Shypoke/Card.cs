@@ -22,7 +22,7 @@ namespace Shypoke
         Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace
     };
 
-    class Card
+    public class Card
     {
         public int cardPointValue { get; set; }
         public string cardSuiteName { get; set; }

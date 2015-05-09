@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Shypoke
 {
-    static class HandAnalysis
+    public static class HandAnalysis
     {
         private static int handScore = 0;  //Default highcard
 
         //returns numeric value sum of maximal hand + type score //CZTODO: HAND MATH WRONG!?
         public static int AnalyzeHand(List<Card> testHand){
-            testHand.Sort();    //hands are analyzed with an assumed order of low-to-high   //CZTOOD: ENSURE SORT ORDER IS CORRECT
+            testHand.OrderBy(x => x.cardPointValue);    //hands are analyzed with an assumed order of low-to-high 
 
+            //CZTODO: Validate Fixed score metric...
             if (IsStraightFlush(testHand))
                 return handScore += 256;
             else if (IsFour(testHand))
