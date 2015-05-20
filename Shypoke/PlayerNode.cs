@@ -13,7 +13,7 @@ namespace Shypoke
         public bool hasFolded { get; set; }
         public int moneyBetInRound { get; set; }
         public PlayerNode Left { get; set; }
-        public int maxHandValue { get; set; }
+        public int handScore { get; set; }
 
         public PlayerNode(int startingMoney)
         {

@@ -115,10 +115,17 @@ namespace Shypoke
 
         private void CalculateHandWinner()
         {
-            List<Card> temp = new List<Card>();
+            int tempScore = 0;
+            List<Card> tempOptimalHand = null;
+
             foreach (PlayerNode target in activePlayers)
             {
-                //temp = target.playerHand.AddRange(communityHand);
+                target.playerHand.AddRange(communityHand);      //merge hands for 7 card set
+                tempOptimalHand = target.playerHand;
+                HandAnalysis.AnalyzeHand(ref tempOptimalHand, ref tempScore);
+
+                target.playerHand = tempOptimalHand;
+                target.handScore = tempScore;
             }
         }
 
