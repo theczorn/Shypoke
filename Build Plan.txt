@@ -6,7 +6,7 @@ LEGEND:
 
 ITERATION 1:
 --Handle Betting Scheme [V]
---Handle Card Comparisons
+--Handle Card Comparisons [V]
 --Handle Game End/Restart
 --Handle 2 Person game ruleset
 --Handle Empty Deck merge
