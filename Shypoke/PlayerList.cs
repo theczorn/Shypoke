@@ -74,18 +74,25 @@ namespace Shypoke
             return current;
         }
 
-        /*public PlayerNode Find(string playerName)
+        public PlayerNode RetrieveWinner()
         {
-            playerName = playerName.ToLower();
+            PlayerNode currentWinner = null;
+            int bestHandScore = 0;
+
             foreach (PlayerNode target in this)
             {
-                if (target.Name = playerName)
+                if (target.handScore == bestHandScore)
                 {
-                    return target;
+                    //CZTODO: NEEDS TO HANDLE MULTIWAY TIES!!!
+                    currentWinner = HandAnalysis.CompareEquivalentHands(currentWinner, target);
+                }
+                else if(target.handScore > bestHandScore){
+                    currentWinner = target;
+                    bestHandScore = previous.handScore;
                 }
             }
 
-            //CZTODO: Throw Error, player DNE
-        }*/
+            return currentWinner;
+        }
     }
 }

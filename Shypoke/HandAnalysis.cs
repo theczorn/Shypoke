@@ -9,6 +9,7 @@ namespace Shypoke
     ///     -Minimize usage of REFS
     ///     -optimize overall algo
     ///     -check Ace Low card straights
+    ///     -order once and then done
     /// </CZTODO>
     /// </summary>
     public static class HandAnalysis
@@ -137,7 +138,7 @@ namespace Shypoke
             else
             {
                 optimal.Reverse();     //needed, we don't know have many of the same suite we have, flip to get top 5
-                testHand = optimal.GetRange(0, 5);
+                testHand = optimal.GetRange(0, 5).OrderBy(x => x.cardPointValue).ToList();
                 return true;
             }
         }
@@ -180,6 +181,7 @@ namespace Shypoke
             testHand = testHand.Except(highTriple).ToList();   //drop our triple to safely cleanse set
             testHand.RemoveRange(0, 2);         //preserve highest two
             testHand.AddRange(highTriple);
+            testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
 
             return true;
         }
@@ -198,6 +200,7 @@ namespace Shypoke
             testHand = testHand.Except(pairList).ToList();   //drop our pair to safely cleanse set
             testHand.RemoveRange(0, 2);  //drop until all we have is the high card
             testHand.AddRange(pairList);
+            testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
 
             return true;
         } 
@@ -214,6 +217,7 @@ namespace Shypoke
             testHand = testHand.Except(highestPair).ToList();   //drop our pair to safely cleanse set
             testHand.RemoveRange(0,2);  //drop two lowest cards
             testHand.AddRange(highestPair);
+            testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
 
             return true;
         }
@@ -222,6 +226,18 @@ namespace Shypoke
         {
             testHand.RemoveRange(0,2);
             return true;
+        }
+
+        public static PlayerNode CompareEquivalentHands(PlayerNode currentWinner, PlayerNode target)
+        {
+            for (int i = 4; i < 0; i--)
+            {
+                if (currentWinner.playerHand[i].cardPointValue > target.playerHand[i].cardPointValue)
+                    return currentWinner;
+                else if (currentWinner.playerHand[i].cardPointValue < target.playerHand[i].cardPointValue)
+                    return target;
+            }
+            throw new InvalidOperationException("Unable to determine best hand");
         }
     }
 }

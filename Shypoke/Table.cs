@@ -98,8 +98,8 @@ namespace Shypoke
                 communityHand.Add(DealTopCard());
                 BetCycle();
 
-                //CZTODO: Reveal Hands
-                CalculateHandWinner();
+                CalculateOptimalHands();
+                DeclareWinner();
             }
             catch (Exception ex)
             {
@@ -110,10 +110,19 @@ namespace Shypoke
                 {
                     target.hasFolded = false;
                 }
+                currentPotSize = 0;
             }
         }
 
-        private void CalculateHandWinner()
+        private void DeclareWinner()
+        {
+            var winner = activePlayers.RetrieveWinner();
+            winner.playerMoney += this.currentPotSize;  //assign winnings
+
+            Console.WriteLine(winner + "has won the round with a handscore of " + winner.handScore);
+        }
+
+        private void CalculateOptimalHands()
         {
             int tempScore = 0;
             List<Card> tempOptimalHand = null;

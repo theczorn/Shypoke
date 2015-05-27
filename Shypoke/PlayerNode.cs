@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Shypoke
 {
-    class PlayerNode
+    public class PlayerNode
     {
         public List<Card> playerHand { get; set; }
         public int playerMoney { get; set; }
