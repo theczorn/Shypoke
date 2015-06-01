@@ -29,6 +29,7 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 13));
             Hand.Add(new Card("Hearts", 14));
 
+            Expected.InsertRange(0, Hand.GetRange(2, 5));
             HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
             
 
@@ -140,6 +141,7 @@ namespace Shypoke_TDD
             HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
 
             Assert.AreEqual(400, HandScore);
+            CollectionAssert.AreEqual(Expected, Hand);
         }
 
         [TestMethod]

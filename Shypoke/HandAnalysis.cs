@@ -228,16 +228,23 @@ namespace Shypoke
             return true;
         }
 
-        public static PlayerNode CompareEquivalentHands(PlayerNode currentWinner, PlayerNode target)
+        //CZTODO: Logic too deep, re-org to reduce returns
+        public static List<PlayerNode> CompareEquivalentHands(List<PlayerNode> currentWinnerList, PlayerNode target)
         {
-            for (int i = 4; i < 0; i--)
+            for (int i = 4; i > 0; i--)
             {
-                if (currentWinner.playerHand[i].cardPointValue > target.playerHand[i].cardPointValue)
-                    return currentWinner;
-                else if (currentWinner.playerHand[i].cardPointValue < target.playerHand[i].cardPointValue)
-                    return target;
+                if (currentWinnerList[0].playerHand[i].cardPointValue > target.playerHand[i].cardPointValue){
+                    return currentWinnerList;
+                }
+                else if (currentWinnerList[0].playerHand[i].cardPointValue < target.playerHand[i].cardPointValue)
+                {
+                    currentWinnerList.Clear();
+                    currentWinnerList.Add(target);
+                    return currentWinnerList;
+                }
             }
-            throw new InvalidOperationException("Unable to determine best hand");
+            currentWinnerList.Add(target);
+            return currentWinnerList;
         }
     }
 }
