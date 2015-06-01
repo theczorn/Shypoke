@@ -18,18 +18,14 @@ namespace Shypoke
         private List<Card> burnDeck;
         private PlayerList activePlayers;
 
-        public PlayerNode bigBlind { get; set; }
-        public PlayerNode smallBlind { get; set; }
-        public PlayerNode dealer { get; set; }
-
         private Random rand = new Random();
 
         #endregion
 
-        public Table(int playerCount, int startingMoney)
+        public Table(int numberOfPlayersInGame, int startingMoney)
         {
             this.startingMoney = startingMoney;
-            currentMinimumBet = (int) Math.Ceiling(startingMoney * .10);
+            currentMinimumBet = (int) Math.Abs(startingMoney * .10);
 
             deck = new List<Card>(52);
             burnDeck = new List<Card>(52);
@@ -38,88 +34,136 @@ namespace Shypoke
             PopulateDeck();
 
             activePlayers = new PlayerList();
-            GeneratePlayers(startingMoney, playerCount);
+            GeneratePlayers(startingMoney, numberOfPlayersInGame);
         }
 
         private void PopulateDeck()
         {
-            foreach (int value in Enumerable.Range(2, 14))
+            foreach (int value in Enumerable.Range(2, 13))
                 deck.Add(new Card("Hearts", value));
 
-            foreach (int value in Enumerable.Range(2, 14))
+            foreach (int value in Enumerable.Range(2, 13))
                 deck.Add(new Card("Clubs", value));
 
-            foreach (int value in Enumerable.Range(2, 14))
+            foreach (int value in Enumerable.Range(2, 13))
                 deck.Add(new Card("Diamonds", value));
 
-            foreach (int value in Enumerable.Range(2, 14))
+            foreach (int value in Enumerable.Range(2, 13))
                 deck.Add(new Card("Spades", value));
 
             Shuffle(deck);
         }
 
-        private void GeneratePlayers(int startingMoney, int playerCount)
+        private void GeneratePlayers(int startingMoney, int numberOfPlayersInGame)
         {
-            for (int i = 0; i < playerCount; i++)
+            for (int i = 0; i < numberOfPlayersInGame; i++)
             {
                 activePlayers.Add(new PlayerNode(startingMoney));
             }
 
             //establish starting roles
-            dealer = activePlayers.Find(rand.Next(0, playerCount));
-            bigBlind = dealer.Left;
-            smallBlind = bigBlind.Left;
+            activePlayers.dealer = activePlayers.Find(rand.Next(0, numberOfPlayersInGame));
+            activePlayers.smallBlind = activePlayers.dealer.Left;
+            activePlayers.bigBlind = activePlayers.smallBlind.Left;
         }
 
         public void StartGame()
         {
-            try
+            while (activePlayers.IsGameOver() == false)
             {
-                //CZTODO: Start with player left of Big Blind
-                CommitBlinds();
-
-                DealHoleCards();
-                BetCycle();
-
-                //Deal Flop Cards
-                BurnTopCard();
-                communityHand.Add(DealTopCard());
-                communityHand.Add(DealTopCard());
-                communityHand.Add(DealTopCard());
-                BetCycle();
-
-                //Deal Fourth Street
-                BurnTopCard();
-                communityHand.Add(DealTopCard());
-                BetCycle();
-
-                //Deal Fifth Street
-                BurnTopCard();
-                communityHand.Add(DealTopCard());
-                BetCycle();
-
-                CalculateOptimalHands();
-                DeclareWinner();
-            }
-            catch (Exception ex)
-            {
-                //CZTODO: Handle overdraw here
-            }
-            finally{    //reset our player states
-                foreach (PlayerNode target in activePlayers)
+                Console.WriteLine("Starting new round");
+                Console.ReadLine();
+                try
                 {
-                    target.hasFolded = false;
+                    CommitBlinds();
+
+                    DealHoleCards();
+                    BetCycle();
+
+                    //Deal Flop Cards
+                    BurnTopCard();
+                    communityHand.Add(DealTopCard());
+                    communityHand.Add(DealTopCard());
+                    communityHand.Add(DealTopCard());
+                    BetCycle();
+
+                    //Deal Fourth Street
+                    BurnTopCard();
+                    communityHand.Add(DealTopCard());
+                    BetCycle();
+
+                    //Deal Fifth Street
+                    BurnTopCard();
+                    communityHand.Add(DealTopCard());
+                    BetCycle();
+
+                    CalculateOptimalHands();
+                    DeclareWinners();
                 }
-                currentPotSize = 0;
+                catch (Exception ex)
+                {
+                    //CZTODO: Log Misc Issues here
+                }
+
+                CleanupTableForNextRound();
             }
         }
 
-        private void DeclareWinner()
+        //CZTODO: Subfunction this
+        private void CleanupTableForNextRound()
         {
-            var winner = activePlayers.RetrieveWinner();
-            winner.playerMoney += this.currentPotSize;  //assign winnings
+            foreach (PlayerNode target in activePlayers)
+            {
+                target.hasFolded = false;
+                target.handScore = 0;
+                target.playerHand.Clear();
 
-            Console.WriteLine(winner + "has won the round with a handscore of " + winner.handScore);
+                if (target.playerMoney == 0)
+                    activePlayers.Remove(target);
+            }
+            EstablishRoles();
+
+            this.communityHand.Clear();
+            
+            Shuffle(burnDeck);          //re-shuffle burndeck back into main deck (don't want to run out of cards)
+            deck.AddRange(burnDeck);
+            burnDeck.Clear();
+
+            currentPotSize = 0;
+        }
+
+        private void EstablishRoles()
+        {
+            if (activePlayers.Count > 2)
+            {
+                activePlayers.dealer = activePlayers.dealer.Left;
+                activePlayers.smallBlind = activePlayers.smallBlind.Left;
+                activePlayers.bigBlind = activePlayers.bigBlind.Left;
+            }
+            else   //CZTODO: Headsup Rules here
+            {
+
+            }
+            
+        }
+
+
+        //CZTODO: This whole chain seems overly long, fix when it's not midnight #___#
+        private void DeclareWinners()
+        {
+            List<PlayerNode> listOfWinners = activePlayers.RetrieveWinner();
+
+            if (listOfWinners.Count > 1)
+            {
+                foreach(PlayerNode winner in listOfWinners)
+                {
+                    winner.playerMoney += Math.Abs(this.currentPotSize / listOfWinners.Count);  //CZTODO: losing salami slices...
+                }
+            }
+            else
+            {
+                listOfWinners[0].playerMoney += this.currentPotSize;  //assign winnings
+            }
         }
 
         private void CalculateOptimalHands()
@@ -129,6 +173,9 @@ namespace Shypoke
 
             foreach (PlayerNode target in activePlayers)
             {
+                if (target.hasFolded)
+                    continue;
+
                 target.playerHand.AddRange(communityHand);      //merge hands for 7 card set
                 tempOptimalHand = target.playerHand;
                 HandAnalysis.AnalyzeHand(ref tempOptimalHand, ref tempScore);
@@ -138,17 +185,19 @@ namespace Shypoke
             }
         }
 
+
         private void BetCycle()
         {
             bool validAction;
-            PlayerNode initiator = smallBlind;
-            activePlayers.current = smallBlind;
+            int numberOfFoldedPlayers = 0;
+
+            PlayerNode initiator = activePlayers.smallBlind;
+            activePlayers.current = activePlayers.smallBlind;
 
             Console.Clear();
 
             do{
-                validAction = false;
-                if (!activePlayers.current.hasFolded)
+                if (activePlayers.current.hasFolded == false && activePlayers.current.playerMoney > 0) //skip players in betcycle who have folded/all-in
                 {
                     do
                     {
@@ -167,24 +216,30 @@ namespace Shypoke
                                 currentPotSize += activePlayers.current.PlaceBet(currentMinimumBet);
                                 validAction = true;
                                 break;
-                            case "f":   //CZTODO: Break Loop if only 1 player left
+                            case "f":   
                                 activePlayers.current.hasFolded = true;
+                                numberOfFoldedPlayers++;
+                                activePlayers.current.blindBetAmount = 0;
                                 validAction = true;
                                 break;
                             default:
                                 Console.WriteLine("Invalid Command: Please enter a valid command.");
+                                validAction = false;
                                 break;
                         }
                     } while (validAction == false);
                 }
                 activePlayers.current = activePlayers.current.Left;
-            } while (activePlayers.current != initiator);
+            } while (activePlayers.current != initiator && numberOfFoldedPlayers != activePlayers.Count-1);   //break loop if all others fold or every player has bet
         }
 
         private void CommitBlinds()
         {
-            smallBlind.PlaceBet((int)currentMinimumBet * (1 / 2));
-            bigBlind.PlaceBet(currentMinimumBet);
+            currentPotSize += activePlayers.smallBlind.PlaceBet(Math.Abs(currentMinimumBet * (1 / 2)));
+            activePlayers.smallBlind.blindBetAmount += Math.Abs(currentMinimumBet * (1 / 2));
+
+            currentPotSize += activePlayers.bigBlind.PlaceBet(currentMinimumBet);
+            activePlayers.bigBlind.blindBetAmount += currentMinimumBet;
         }
 
         #region Deck Manipulations
@@ -193,7 +248,7 @@ namespace Shypoke
         {
             for (int i = 0; i < 2; i++)
             {
-                foreach (PlayerNode p in activePlayers) //CZTODO: should normally start with small blind...
+                foreach (PlayerNode p in activePlayers)
                 {
                     p.playerHand.Add(DealTopCard());
                 }
@@ -209,6 +264,7 @@ namespace Shypoke
         private Card DealTopCard() 
         {
             Card topCard = deck[0];
+            burnDeck.Add(topCard);
             deck.RemoveAt(0);
             return topCard;
         }
