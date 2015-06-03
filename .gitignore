@@ -23,3 +23,5 @@ Shypoke/obj/Debug/Shypoke.csproj.FileListAbsolute.txt
 Shypoke/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
 *.cache
 Shypoke_TDD/obj/Debug/Shypoke_TDD.dll
+Shypoke.sln
+*.xml
