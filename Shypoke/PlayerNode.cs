@@ -14,10 +14,12 @@ namespace Shypoke
         public int blindBetAmount { get; set; }
         public PlayerNode Left { get; set; }
         public int handScore { get; set; }
+        public string playerName { get; set; }
 
-        public PlayerNode(int startingMoney)
+        public PlayerNode(string name, int startingMoney)
         {
             playerMoney = startingMoney;
+            playerName = name;
             playerHand = new List<Card>();
             isOutOfGame = false;
         }

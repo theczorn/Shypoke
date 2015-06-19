@@ -11,7 +11,6 @@ namespace Shypoke
         private int startingMoney;
         private int currentMinimumBet;
         private int currentPotSize;
-        private bool isTwoPlayer;
 
         private List<Card> deck;
         private List<Card> communityHand;
@@ -58,13 +57,22 @@ namespace Shypoke
         {
             for (int i = 0; i < numberOfPlayersInGame; i++)
             {
-                activePlayers.Add(new PlayerNode(startingMoney));
+                activePlayers.Add(new PlayerNode("player"+(i+1), startingMoney));
             }
 
             //establish starting roles
             activePlayers.dealer = activePlayers.Find(rand.Next(0, numberOfPlayersInGame));
-            activePlayers.smallBlind = activePlayers.dealer.Left;
-            activePlayers.bigBlind = activePlayers.smallBlind.Left;
+            if (activePlayers.Count == 2)
+            {
+                activePlayers.smallBlind = activePlayers.dealer;
+                activePlayers.bigBlind = activePlayers.smallBlind.Left;
+            }
+            else
+            {
+                activePlayers.smallBlind = activePlayers.dealer.Left;
+                activePlayers.bigBlind = activePlayers.smallBlind.Left;
+            }
+
         }
 
         public void StartGame()
@@ -79,6 +87,10 @@ namespace Shypoke
 
                     DealHoleCards();
                     BetCycle();
+
+                    //Reverse ordering if heads up              //CZTODO: verify if this needs to occur here OR after flop/before flop betcycle
+                    if (activePlayers.Count == 2)
+                        activePlayers.SwapBetPriorityForHeadsUp();
 
                     //Deal Flop Cards
                     BurnTopCard();
@@ -109,19 +121,9 @@ namespace Shypoke
             }
         }
 
-        //CZTODO: Subfunction this
         private void CleanupTableForNextRound()
         {
-            foreach (PlayerNode target in activePlayers)
-            {
-                target.hasFolded = false;
-                target.handScore = 0;
-                target.playerHand.Clear();
-
-                if (target.playerMoney == 0)
-                    activePlayers.Remove(target);
-            }
-            EstablishRoles();
+            activePlayers.CleanupPlayerList();
 
             this.communityHand.Clear();
             
@@ -130,21 +132,6 @@ namespace Shypoke
             burnDeck.Clear();
 
             currentPotSize = 0;
-        }
-
-        private void EstablishRoles()
-        {
-            if (activePlayers.Count > 2)
-            {
-                activePlayers.dealer = activePlayers.dealer.Left;
-                activePlayers.smallBlind = activePlayers.smallBlind.Left;
-                activePlayers.bigBlind = activePlayers.bigBlind.Left;
-            }
-            else   //CZTODO: Headsup Rules here
-            {
-
-            }
-            
         }
 
 
@@ -188,14 +175,16 @@ namespace Shypoke
 
         private void BetCycle()
         {
+            if (activePlayers.Count - activePlayers.NumberOfAllinOrFoldedPlayers == 1)
+                return; //no need to betcycle, expedite to end of round. One guy with chips left to play
+
             bool validAction;
-            int numberOfFoldedPlayers = 0;
 
             PlayerNode initiator = activePlayers.smallBlind;
             activePlayers.current = activePlayers.smallBlind;
 
             Console.Clear();
-
+            
             do{
                 if (activePlayers.current.hasFolded == false && activePlayers.current.playerMoney > 0) //skip players in betcycle who have folded/all-in
                 {
@@ -218,7 +207,7 @@ namespace Shypoke
                                 break;
                             case "f":   
                                 activePlayers.current.hasFolded = true;
-                                numberOfFoldedPlayers++;
+                                activePlayers.NumberOfAllinOrFoldedPlayers++;
                                 activePlayers.current.blindBetAmount = 0;
                                 validAction = true;
                                 break;
@@ -228,9 +217,12 @@ namespace Shypoke
                                 break;
                         }
                     } while (validAction == false);
+
+                    if (activePlayers.current.playerMoney == 0)
+                        activePlayers.NumberOfAllinOrFoldedPlayers++;
                 }
                 activePlayers.current = activePlayers.current.Left;
-            } while (activePlayers.current != initiator && numberOfFoldedPlayers != activePlayers.Count-1);   //break loop if all others fold or every player has bet
+            } while (activePlayers.current != initiator);   //break loop if we've passed thru everyon
         }
 
         private void CommitBlinds()
@@ -270,20 +262,20 @@ namespace Shypoke
         }
 
         //Implements Fisher-Yates shuffle x5
-        private void Shuffle(List<Card> deck)
+        private void Shuffle(List<Card> targetDeck)
         {
             Card tempCard;
             int swapIndex;
 
             for (int shuffleCount = 0; shuffleCount < 5; shuffleCount++)
             {
-                for (int i = 0; i < deck.Count; i++)
+                for (int i = 0; i < targetDeck.Count; i++)
                 {
-                    swapIndex = rand.Next(0, deck.Count);
-                    tempCard = deck[swapIndex];
+                    swapIndex = rand.Next(0, targetDeck.Count);
+                    tempCard = targetDeck[swapIndex];
 
-                    deck[swapIndex] = deck[i];
-                    deck[i] = tempCard;
+                    targetDeck[swapIndex] = targetDeck[i];
+                    targetDeck[i] = tempCard;
                 }
             }
         }

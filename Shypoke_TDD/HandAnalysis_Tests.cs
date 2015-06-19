@@ -8,11 +8,10 @@ namespace Shypoke_TDD
 {
     /// <summary>
     /// <CZTODO>
-    ///     -Add in checks for expected hands as well as handscore
     /// </CZTODO>
     /// </summary>
     [TestClass]
-    public class UnitTest1
+    public class HandAnalysis_Tests
     {
         public List<Card> Hand = new List<Card>();
         public List<Card> Expected = new List<Card>(); 

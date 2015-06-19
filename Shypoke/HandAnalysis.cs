@@ -87,16 +87,17 @@ namespace Shypoke
         private static bool IsFour(ref List<Card> testHand)
         {
 
-            List<Card> pairList = testHand.GroupBy(x => x.cardPointValue)
+            List<Card> quadList = testHand.GroupBy(x => x.cardPointValue)
                 .Where(x => x.Count() == 4)
                 .SelectMany(x => x).ToList();
 
-            if (!pairList.Any())
+            if (!quadList.Any())
                 return false;
 
-            testHand = testHand.Except(pairList).ToList();  //drop our pair to safely cleanse set
+            testHand = testHand.Except(quadList).ToList();  //drop our pair to safely cleanse set
             testHand.RemoveRange(0, 2);                     //drop until all we have is the high card
-            testHand.AddRange(pairList);
+            testHand.AddRange(quadList);
+            testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
 
             return true;
         }
@@ -114,13 +115,22 @@ namespace Shypoke
 
                 return true;
             }
-            else if (testGroup.Count(x => x.Count() == 3) == 1  //set of 2,2,3
+            else if (testGroup.Count(x => x.Count() == 3) == 1  //set of 2,2,3  //CZTODO: Clean Logic
                 &&
                 testGroup.Count(x => x.Count() == 2) == 2)
             {
-                testHand = testGroup.SelectMany(x => x)
-                    .Skip(2)            //skip low pair
-                    .Take(5).ToList();  //retrieve highest flush
+                testHand = new List<Card>();
+                testHand.AddRange(                  //add triple
+                    testGroup.Where(x => x.Count() == 3)
+                   .SelectMany(x => x).ToList()
+                );
+                testHand.AddRange(                  //get high double
+                    testGroup.Where(x => x.Count() == 2)
+                    .SelectMany(x => x).ToList().GetRange(2,2)
+                );
+
+                testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
+
                 return true;
             }
             return false;
@@ -145,7 +155,8 @@ namespace Shypoke
 
         private static bool IsStraight(ref List<Card> testHand)
         {
-            List<Card> optimal = testHand.Distinct().ToList();    //dupes skew analysis, remove
+            //CZTODO: optimize
+            List<Card> optimal = testHand.GroupBy(x => x.cardPointValue).Select(grp => grp.First()).ToList();  //dupes skew analysis, remove
 
             if (optimal.Count() == 7
                 && optimal[6].cardPointValue - optimal[2].cardPointValue == 4)
@@ -188,18 +199,18 @@ namespace Shypoke
 
         private static bool IsTwoPair(ref List<Card> testHand)
         {
-            List<Card> pairList = testHand.GroupBy(x => x.cardPointValue)
-                .TakeWhile(x => x.Count() == 2)
+            List<Card> pairsList = testHand.GroupBy(x => x.cardPointValue)
+                .Where(x => x.Count() == 2)
                 .SelectMany(x => x).ToList();
 
-            if (pairList.Count() < 4)
+            if (pairsList.Count() < 4)
                 return false;
-            else if (pairList.Count() > 4)
-                pairList.RemoveRange(0, 2); //3 pair in List, remove first, lowest pair
+            else if (pairsList.Count() > 4)
+                pairsList.RemoveRange(0, 2); //3 pair in List, remove first, lowest pair
 
-            testHand = testHand.Except(pairList).ToList();   //drop our pair to safely cleanse set
-            testHand.RemoveRange(0, 2);  //drop until all we have is the high card
-            testHand.AddRange(pairList);
+            testHand = testHand.Except(pairsList).ToList();     //drop our pair to safely cleanse set
+            testHand.RemoveRange(0, 2);                         //filter for high card
+            testHand.AddRange(pairsList);
             testHand = testHand.OrderBy(x => x.cardPointValue).ToList();
 
             return true;
