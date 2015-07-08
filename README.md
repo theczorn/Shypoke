@@ -8,7 +8,7 @@ ITERATION 1 - Primitive Console (Unplayable State)
 - [X] Handle Game End Logic
 - [ ] Handle 2 Person game rulset									//Validate
 - [X] Handle Empty Deck merge
-- [ ] Implement Ace Low detecton for straights/straight flushes
+- [X] Implement Ace Low detecton for straights/straight flushes
 - [ ] Ensure Cyclomatic Complexity lower than 10
 
 
