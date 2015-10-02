@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Shypoke
 {
-    class PlayerList : System.Collections.IEnumerable
+    class PlayerList
     {
-        public PlayerNode root { get; set; }    //points to first item added in collection for constructor
-        private PlayerNode last { get; set; }   //points to the last item added in collection for constructor
+        public PlayerNode root { get; set; }    //for constructor
+        private PlayerNode last { get; set; }   //for constructor
         public PlayerNode current { get; set; }
 
         public PlayerNode bigBlind { get; set; }
@@ -17,20 +17,33 @@ namespace Shypoke
         public PlayerNode dealer { get; set; }
 
         public int Count { get; set; }
+        private int deltaCount = 0;
         public int NumberOfAllinOrFoldedPlayers { get; set; }
         private bool wasDealerDeleted = false;
         private bool enteringHeadsUpState = false;
 
         public PlayerList() { }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        public IEnumerable<PlayerNode> smallBlindIterator()     //iterator for dealing cards, etc. starting on Small Blind Role
         {
-            current = smallBlind;           //any initial table iterations need to start at smallblind and rotate left (was root prior here an do/while...)
+            current = smallBlind;
             do
             {
                 yield return current;
-                current = current.Left;      //NOTE: collection of players is to be iterated thru in a clockwise fashion, so navigate Left
+                current = current.Left;
             } while (current != smallBlind);
+        }
+
+        public IEnumerable<PlayerNode> rootIterator()           //iterator for playerlist cleanup and organization, begins at Root of PlayerList
+        {
+            current = root;
+            Console.Clear();
+            for(int i = 0; i < this.Count; i++)
+            {
+                Console.WriteLine(current.playerName);
+                yield return current;
+                current = current.Left;
+            }
         }
 
         public void Add(PlayerNode newNode)
@@ -44,7 +57,7 @@ namespace Shypoke
             {
                 last.Left = newNode;
                 last = newNode;
-                last.Left = root; //ensure list is circular once we have 3+ players
+                last.Left = root; //ensure list is circular once we have 2+ players
             }
             Count += 1;
         }
@@ -54,16 +67,16 @@ namespace Shypoke
             return Count > 1? false:true;
         }
 
-        public bool Remove(PlayerNode targetNode)
+        public bool Remove(PlayerNode targetNode)   //CZTODO: optimize this with Find(int)...
         {
-            foreach (PlayerNode node in this)
+            foreach (PlayerNode node in this.rootIterator())
             {
                 if (node.Left == targetNode)
                 {
                     node.Left.isOutOfGame = true;
-                    Count -= 1;
+                    deltaCount += 1;
 
-                    if (Count == 2)
+                    if (Count-deltaCount == 2)
                         enteringHeadsUpState = true;
 
                     if (node.Left == dealer)    //target node is dealer, shift this role to preserve ordering of blind roles
@@ -72,15 +85,18 @@ namespace Shypoke
                         wasDealerDeleted = true;
                     }
 
-                    PlayerNode newNeighbor = node.Left.Left;    //record item we want to redirect player order to
-                    node.Left.Left = null;                      //decouple target tail
-                    node.Left = newNeighbor;                    //redirect prior player to skip over deleted target
+                    if (node.Left == root)
+                        root = root.Left;
+
+                    PlayerNode newNeighbor = node.Left.Left;
+                    node.Left.Left = null;
+                    node.Left = newNeighbor;
 
                     return true;
                 }
             }
 
-            throw new KeyNotFoundException("Target node doesn't exist in this table");
+            throw new KeyNotFoundException("Target node doesn't exist at this table");
         }
 
          public PlayerNode Find(int randomNumber)
@@ -97,20 +113,26 @@ namespace Shypoke
         {
             List<PlayerNode> currentWinner = new List<PlayerNode>();
             int bestHandScore = 0;
+            int bestHandRankHighCardScore = 0;
 
-            foreach (PlayerNode target in this)
+            foreach (PlayerNode target in this.rootIterator())
             {
                 if (target.hasFolded)
                     continue;
 
-                if (target.handScore == bestHandScore)
-                {
-                    currentWinner = HandAnalysis.CompareEquivalentHands(currentWinner, target);
-                }
-                else if(target.handScore > bestHandScore){
+                if (target.playerHand.handRankScore > bestHandScore         //hand rank is better
+                    || (target.playerHand.handRankScore == bestHandScore    //OR hand ranks are equivalent, but one has a better "set"
+                        && target.playerHand.handRankHighCardScore == bestHandRankHighCardScore)
+                    ){
                     currentWinner.Clear();
                     currentWinner.Add(target);
-                    bestHandScore = target.handScore;
+                    bestHandScore = target.playerHand.handRankScore;
+                    bestHandRankHighCardScore = target.playerHand.handRankHighCardScore;
+                }
+                else if (target.playerHand.handRankScore == bestHandScore
+                    && target.playerHand.handRankHighCardScore == bestHandRankHighCardScore) //players have same hand rank and top card, iterate to find kicker that is our winning player(s)
+                {
+                    currentWinner = HandAnalysis.CompareEquivalentHands(currentWinner, target);
                 }
             }
 
@@ -156,15 +178,19 @@ namespace Shypoke
         {
             this.NumberOfAllinOrFoldedPlayers = 0;
 
-            foreach (PlayerNode target in this)
+            foreach (PlayerNode target in this.rootIterator())
             {
-                target.hasFolded = false;
-                target.handScore = 0;
-                target.playerHand.Clear();
-
                 if (target.playerMoney == 0)
                     this.Remove(target);
+                else
+                {
+                    target.hasFolded = false;
+                    target.playerHand.Clear();
+                }
             }
+            this.Count -= deltaCount;
+            deltaCount = 0;
+
             this.EstablishRoles();
         }
     }

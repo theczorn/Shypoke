@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Shypoke
 {
@@ -144,7 +143,7 @@ namespace Shypoke
             {
                 foreach(PlayerNode winner in listOfWinners)
                 {
-                    winner.playerMoney += Math.Abs(this.currentPotSize / listOfWinners.Count);  //CZTODO: losing salami slices...
+                    winner.playerMoney += Math.Abs(this.currentPotSize / listOfWinners.Count);  //CZTODO: losing cent fractions here. Acceptable?
                 }
             }
             else
@@ -155,20 +154,16 @@ namespace Shypoke
 
         private void CalculateOptimalHands()
         {
-            int tempScore = 0;
-            List<Card> tempOptimalHand = null;
+            PlayerHand tempOptimalHand = null;
 
-            foreach (PlayerNode target in activePlayers)
+            foreach (PlayerNode target in activePlayers.rootIterator())
             {
                 if (target.hasFolded)
                     continue;
 
                 target.playerHand.AddRange(communityHand);      //merge hands for 7 card set
                 tempOptimalHand = target.playerHand;
-                HandAnalysis.AnalyzeHand(ref tempOptimalHand, ref tempScore);
-
-                target.playerHand = tempOptimalHand;
-                target.handScore = tempScore;
+                target.playerHand = HandAnalysis.AnalyzeHand(tempOptimalHand);
             }
         }
 
@@ -222,7 +217,7 @@ namespace Shypoke
                         activePlayers.NumberOfAllinOrFoldedPlayers++;
                 }
                 activePlayers.current = activePlayers.current.Left;
-            } while (activePlayers.current != initiator);   //break loop if we've passed thru everyon
+            } while (activePlayers.current != initiator);   //break loop if we've gone around the table and everyone has made legal actions
         }
 
         private void CommitBlinds()
@@ -240,7 +235,7 @@ namespace Shypoke
         {
             for (int i = 0; i < 2; i++)
             {
-                foreach (PlayerNode p in activePlayers)
+                foreach (PlayerNode p in activePlayers.smallBlindIterator())
                 {
                     p.playerHand.Add(DealTopCard());
                 }

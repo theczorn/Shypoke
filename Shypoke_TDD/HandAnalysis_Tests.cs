@@ -1,20 +1,13 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shypoke;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Shypoke_TDD
 {
-    /// <summary>
-    /// <CZTODO>
-    /// </CZTODO>
-    /// </summary>
     [TestClass]
     public class HandAnalysis_Tests
     {
-        public List<Card> Hand = new List<Card>();
-        public List<Card> Expected = new List<Card>(); 
+        public PlayerHand Hand = new PlayerHand();
+        public PlayerHand Expected = new PlayerHand();
         public int HandScore = 0;
 
         [TestMethod]
@@ -29,10 +22,10 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 14));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
-            
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(800, HandScore);
+
+            Assert.AreEqual(14, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -48,9 +41,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Clubs", 12));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(700, HandScore);
+            Assert.AreEqual(12, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -66,9 +59,10 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Clubs", 4));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(600, HandScore);
+            Assert.AreEqual(4, Hand.handRankHighCardScore);
+            CollectionAssert.AreEqual(Expected, Hand);
         }
 
         [TestMethod]
@@ -83,9 +77,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Clubs", 4));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(600, HandScore);
+            Assert.AreEqual(4, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -101,9 +95,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 13));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(500, HandScore);
+            Assert.AreEqual(13, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -119,9 +113,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 9));
 
             Expected.InsertRange(0, Hand.GetRange(0,5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(400, HandScore);
+            Assert.AreEqual(6, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -137,9 +131,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 14));
 
             Expected.InsertRange(0, Hand.GetRange(1, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(400, HandScore);
+            Assert.AreEqual(8, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -155,9 +149,27 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 8));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(400, HandScore);
+            Assert.AreEqual(8, Hand.handRankHighCardScore);
+            CollectionAssert.AreEqual(Expected, Hand);
+        }
+
+        [TestMethod]
+        public void DetectStraightAceLow_Test()
+        {
+            Hand.Add(new Card("Hearts", 14));
+            Hand.Add(new Card("Diamonds", 2));
+            Hand.Add(new Card("Hearts", 3));
+            Hand.Add(new Card("Spades", 4));
+            Hand.Add(new Card("Hearts", 5));
+            Hand.Add(new Card("Spades", 11));
+            Hand.Add(new Card("Hearts", 12));
+
+            Expected.InsertRange(0, Hand.GetRange(0, 5));
+            Hand = HandAnalysis.AnalyzeHand(Hand);
+
+            Assert.AreEqual(5, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -173,9 +185,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 13));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(300, HandScore);
+            Assert.AreEqual(10, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -192,9 +204,9 @@ namespace Shypoke_TDD
 
             Expected.InsertRange(0, Hand.GetRange(0, 4));
             Expected.Insert(4, Hand[6]);
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(200, HandScore);
+            Assert.AreEqual(4, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -210,9 +222,9 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 13));
 
             Expected.InsertRange(0, Hand.GetRange(2,5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(200, HandScore);
+            Assert.AreEqual(11, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -229,9 +241,9 @@ namespace Shypoke_TDD
 
             Expected.InsertRange(0, Hand.GetRange(0, 2));
             Expected.InsertRange(2, Hand.GetRange(4 ,3));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
 
-            Assert.AreEqual(100, HandScore);
+            Assert.AreEqual(2, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
 
@@ -247,11 +259,10 @@ namespace Shypoke_TDD
             Hand.Add(new Card("Hearts", 14));
 
             Expected.InsertRange(0, Hand.GetRange(2, 5));
-            HandAnalysis.AnalyzeHand(ref Hand, ref HandScore);
-            
-            Assert.AreEqual(1, HandScore);
+            Hand = HandAnalysis.AnalyzeHand(Hand);
+
+            Assert.AreEqual(14, Hand.handRankHighCardScore);
             CollectionAssert.AreEqual(Expected, Hand);
         }
-
     }
 }
