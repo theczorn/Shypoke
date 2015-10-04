@@ -50,6 +50,16 @@
     <Compile Include="PlayerNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\Flush_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\FourOfAKind_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\FullHouse_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\HighCard_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\IRuleItem.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\Pair_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\StraightFlush_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\Straight_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\ThreeOfAKind_Rule.cs" />
+    <Compile Include="Rules\Texas No Limit Hold Em Poker\TwoPair_Rule.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="ValidationHelper.cs" />
   </ItemGroup>

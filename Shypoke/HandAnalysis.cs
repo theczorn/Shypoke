@@ -2,26 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using Shypoke.Extension_Library;
+using Shypoke.Rules.Texas_No_Limit_Hold_Em_Poker;
 
 namespace Shypoke
 {
     /// <summary>
     /// <CZTODO>
-    ///     -optimize overall algo/minimize REFS
-    ///     -order once and then done (LINQ's IOrderedEnumerable?)
-    ///     -refactor AnalyzeHand with a Strategy Pattern
+    ///     -order one time if possible...
     /// </CZTODO>
     /// </summary>
-    public static class HandAnalysis
+    public class HandAnalysis
     {
-        private static bool handContainsAce = false;
-
-        public static PlayerHand AnalyzeHand(PlayerHand testHand)
+        public static PlayerHand AnalyzeHand(PlayerHand testHand, List<IRuleItem> rulesList)
         {
             testHand = testHand.OrderBy(x => x.cardPointValue).ToPlayerHand();    //hands are analyzed with an assumed order of low-to-high 
-            handContainsAce = testHand.Exists(x => x.cardPointValue == 14);
-
-            if (IsStraightFlush(ref testHand))
+            #region Analysis Manual Calls
+            /*if (IsStraightFlush(ref testHand))
             {
                 testHand.handRankScore = 800;
                 testHand.handRankHighCardScore = testHand[4].cardPointValue;
@@ -62,12 +58,24 @@ namespace Shypoke
                 testHand.handRankHighCardScore = testHand[4].cardPointValue;
             }
             else
+                throw new Exception("User's hand has no valid ranking.");*/
+            #endregion
+
+            foreach(IRuleItem rule in rulesList)
+            {
+                testHand = rule.ExecuteRule(testHand);
+
+                if (testHand.Count == 5)
+                    break;
+            }
+
+            if(testHand.Count == 7)
                 throw new Exception("User's hand has no valid ranking.");
 
             return testHand;
         }
-
-        private static bool IsStraightFlush(ref PlayerHand testHand)
+        #region Rank Analyzers
+        /*private static bool IsStraightFlush(ref PlayerHand testHand)
         {
             PlayerHand optimal = testHand;
 
@@ -252,12 +260,13 @@ namespace Shypoke
         {
             testHand.RemoveRange(0,2);
             return true;
-        }
+        }*/
+        #endregion
 
         //CZTODO: Logic too deep, re-org to reduce returns
         public static List<PlayerNode> CompareEquivalentHands(List<PlayerNode> currentWinnerList, PlayerNode target)
         {
-            for (int i = 4; i > 0; i--)
+            for (int i = currentWinnerList.Count; i > 0; i--)
             {
                 if (currentWinnerList[0].playerHand[i].cardPointValue > target.playerHand[i].cardPointValue){
                     return currentWinnerList;

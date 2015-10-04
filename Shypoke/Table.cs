@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Shypoke.Rules.Texas_No_Limit_Hold_Em_Poker;
 
 namespace Shypoke
 {
@@ -15,6 +16,7 @@ namespace Shypoke
         private List<Card> communityHand;
         private List<Card> burnDeck;
         private PlayerList activePlayers;
+        private List<IRuleItem> rulesList;
 
         private Random rand = new Random();
 
@@ -33,6 +35,27 @@ namespace Shypoke
 
             activePlayers = new PlayerList();
             GeneratePlayers(startingMoney, numberOfPlayersInGame);
+            GenerateGameRulesStrategy();
+        }
+
+        /// <summary>
+        /// By Default generates Texas No Hold 'Em Hand Analysis rules
+        /// CZTODO: Build up on this later to implement future rulesets/variants
+        /// </summary>
+        private void GenerateGameRulesStrategy()
+        {
+            rulesList = new List<IRuleItem>()
+            {
+                new StraightFlush_Rule()
+                ,new FourOfAKind_Rule()
+                ,new FullHouse_Rule()
+                ,new Flush_Rule()
+                ,new Straight_Rule()
+                ,new ThreeOfAKind_Rule()
+                ,new TwoPair_Rule()
+                ,new Pair_Rule()
+                ,new HighCard_Rule()
+            };
         }
 
         private void PopulateDeck()
@@ -126,7 +149,7 @@ namespace Shypoke
 
             this.communityHand.Clear();
             
-            Shuffle(burnDeck);          //re-shuffle burndeck back into main deck (don't want to run out of cards)
+            Shuffle(burnDeck);          //re-shuffle burn deck back into main deck (don't want to run out of cards)
             deck.AddRange(burnDeck);
             burnDeck.Clear();
 
@@ -155,7 +178,6 @@ namespace Shypoke
         private void CalculateOptimalHands()
         {
             PlayerHand tempOptimalHand = null;
-
             foreach (PlayerNode target in activePlayers.rootIterator())
             {
                 if (target.hasFolded)
@@ -163,7 +185,7 @@ namespace Shypoke
 
                 target.playerHand.AddRange(communityHand);      //merge hands for 7 card set
                 tempOptimalHand = target.playerHand;
-                target.playerHand = HandAnalysis.AnalyzeHand(tempOptimalHand);
+                target.playerHand = HandAnalysis.AnalyzeHand(tempOptimalHand, rulesList);
             }
         }
 

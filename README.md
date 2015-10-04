@@ -10,6 +10,7 @@ ITERATION 1 - Primitive Console (Unplayable State)
 - [X] Handle Empty Deck merge
 - [X] Implement Ace Low detecton for straights/straight flushes
 - [ ] Ensure Cyclomatic Complexity lower than 10
+- [ ] Increase Unit Test Coverage of Business Logic to 80% (Ignore front-end UI, will be scrapped in ITERATION 2)
 
 
 ITERATION 2 - Local GUI Client (Unplayable State)
